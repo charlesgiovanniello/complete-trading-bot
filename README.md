@@ -1,6 +1,6 @@
-# incomplete-trading-bot
- More at www.theincompleteguide.com
+# Complete-trading-bot
 
- This code is free, THANK YOU!
- It is explained at the guide you can find at www.theincompleteguide.com
- You will also find improvement ideas and explanations
+Changes / modificaitons to Andreu Marquès' incomplete trading bot (https://www.udemy.com/course/build-a-trading-bot/).
+
+Script will run indefinitely, pull new trending market tickers daily, and trade based off of EMA's, RSI's, and Stochastic indicators.
+
