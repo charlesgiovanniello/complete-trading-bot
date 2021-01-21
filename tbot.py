@@ -6,7 +6,7 @@ import os
 import threading
 from bs4 import BeautifulSoup as soup
 from urllib.request import urlopen
-from datetime import datetime as dt
+from datetime import datetime as dt, time
 
 import gvars
 from assetHandler import AssetHandler
@@ -35,7 +35,7 @@ class MultiHandler(logging.Handler):
             self.release()
 
     def _get_or_open(self, key):
-        # Get the file pointer for the given key, or else open the file
+        # Get the file pointer for the given key, or else open the file e
         self.acquire()
         try:
             if key in self.files:
@@ -73,10 +73,12 @@ def clean_positions(api):
     # Sell all positions
     positions = api.list_positions()
     print('\nSELL OPEN POSITIONS')
-    print(print('%i positions were found' % int(len(positions))))
-    for position in positions:
-        api.submit_order(position.symbol, position.qty, 'sell', 'market', 'day')
-        print(position.qty + " shares of " +position.symbol + " sold" )
+    #api.cancel_all_orders()
+    api.close_all_positions()
+    # print(print('%i positions were found' % int(len(positions))))
+    # for position in positions:
+    #     api.submit_order(position.symbol, position.qty, 'sell', 'market', 'day')
+    #     print(position.qty + " shares of " +position.symbol + " sold" )
 
 
 def check_account_ok(api):
@@ -209,7 +211,7 @@ if __name__ == '__main__':
                 portClear = False
                 time.sleep(1)
             else:
-                print("Market is closed, trading will commence in: " + str(day_start - dt.now()))
+                print("Market is closed, trading will commence in: " + str( day_start - dt.now()) )
                 if p.is_alive():
                     p.terminate()
                     p.join()
