@@ -232,9 +232,10 @@ if __name__ == '__main__':
                 portClear = False
                 time.sleep(1)
             else:
-
-
-                print("Trading window is closed, afterHours = " + str(afterHours()) ) #str( day_start - dt.now())
+                if afterHours():
+                    print("Trading window is closed, afterHours = " + str(afterHours()) ) #str( day_start - dt.now())
+                if not afterHours():
+                    print("Market is open. Gathering assets. Trading will commence in: " + str( day_start - dt.now()))
                 day_start = dt(dt.now().year, dt.now().month, dt.now().day, 9, 52)
                 day_end = dt(dt.now().year, dt.now().month, dt.now().day, 15, 58)
                 if p.is_alive():
