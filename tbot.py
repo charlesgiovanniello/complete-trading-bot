@@ -13,6 +13,11 @@ from assetHandler import AssetHandler
 from other_functions import *
 from stocklib import *
 from traderlib import *
+import datetime, pytz, holidays
+
+#For checking if market is open
+tz = pytz.timezone('US/Eastern')
+us_holidays = holidays.US()
 
 # Global object we log to; the handler will work with any log message
 _L = logging.getLogger("demo")
@@ -80,6 +85,22 @@ def clean_positions(api):
     #     api.submit_order(position.symbol, position.qty, 'sell', 'market', 'day')
     #     print(position.qty + " shares of " +position.symbol + " sold" )
 
+def afterHours(now = None):
+        if not now:
+            now = datetime.datetime.now(tz)
+        openTime = datetime.time(hour = 9, minute = 30, second = 0)
+        closeTime = datetime.time(hour = 16, minute = 0, second = 0)
+        # If a holiday
+        if now.strftime('%Y-%m-%d') in us_holidays:
+            return True
+        # If before 0930 or after 1600
+        if (now.time() < openTime) or (now.time() > closeTime):
+            return True
+        # If it's a weekend
+        if now.date().weekday() > 4:
+            return True
+
+        return False
 
 def check_account_ok(api):
 
@@ -207,13 +228,13 @@ if __name__ == '__main__':
 
         while True:
             # Market is open, bot is running
-            if day_start < dt.now() < day_end:
+            if (day_start < dt.now() < day_end) and not afterHours():
                 portClear = False
                 time.sleep(1)
             else:
 
 
-                print("Market is closed, trading will commence in: " + str( day_start - dt.now()) )
+                print("Trading window is closed, afterHours = " + str(afterHours()) ) #str( day_start - dt.now())
                 day_start = dt(dt.now().year, dt.now().month, dt.now().day, 9, 52)
                 day_end = dt(dt.now().year, dt.now().month, dt.now().day, 15, 58)
                 if p.is_alive():
@@ -223,5 +244,5 @@ if __name__ == '__main__':
                     clean_positions(api)
                     portClear = True
                 time.sleep(10)
-                if day_start < dt.now() < day_end:
+                if (day_start < dt.now() < day_end) and not afterHours():
                     break;
