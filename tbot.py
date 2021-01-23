@@ -166,8 +166,6 @@ def get_new_assets():
     # fObj.close()
     #new 
 
-
-
 def main():
 
     # Set up a basic stderr logging.
@@ -218,32 +216,35 @@ def main():
 
 if __name__ == '__main__':
     api = tradeapi.REST(gvars.API_KEY, gvars.API_SECRET_KEY, gvars.ALPACA_API_URL, api_version='v2')
+    # These will be our trading window bounds. We give margins to allow ticker data to come in, and to ensure we can close positions before market closes.
     day_start = dt(dt.now().year, dt.now().month, dt.now().day, 9, 52)
     day_end = dt(dt.now().year, dt.now().month, dt.now().day, 15, 58)
-    portClear = True
     while True:
+        
         p = multiprocessing.Process(target=main)
         if day_start < dt.now() < day_end:
             p.start()
 
-        while True:
-            # Market is open, bot is running
-            if (day_start < dt.now() < day_end) and not afterHours():
-                portClear = False
-                time.sleep(1)
-            else:
-                if afterHours():
-                    print("Trading window is closed, afterHours = " + str(afterHours()) ) #str( day_start - dt.now())
-                if not afterHours():
-                    print("Market is open. Gathering assets. Trading will commence in: " + str( day_start - dt.now()))
+        # Trading window is open, constantly ensure that is the case. If not, continue on .
+        while (day_start < dt.now() < day_end) and not afterHours():
+            time.sleep(1)
+        
+        # At this point, trading window is closed and we kill the trader, clean out open positions.
+        while not ( (day_start < dt.now() < day_end) and not afterHours() ):
+            if p.is_alive():
+                p.terminate()
+                p.join()
+                clean_positions(api)
+                print("Positions cleared. Market closing shortly...")
+                time.sleep(10)
+            if afterHours():
+                print("Trading window is closed, afterHours = " + str(afterHours()))
+            if not afterHours():
+                #Set new day start / end time, display countdown.
                 day_start = dt(dt.now().year, dt.now().month, dt.now().day, 9, 52)
                 day_end = dt(dt.now().year, dt.now().month, dt.now().day, 15, 58)
-                if p.is_alive():
-                    p.terminate()
-                    p.join()
-                if not portClear:
-                    clean_positions(api)
-                    portClear = True
-                time.sleep(10)
-                if (day_start < dt.now() < day_end) and not afterHours():
-                    break;
+                print("Market is open. Gathering assets. Trading will commence in: " + str( day_start - dt.now())) 
+            # Neat lil dot animation
+            for i in range(10):
+                print('.')
+                time.sleep(1)
