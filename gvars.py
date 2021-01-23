@@ -8,7 +8,8 @@ from datetime import datetime
 MAX_WORKERS = 25 # max threads at a time
 
 gainRatio = 1.5 # takeProfit = -stopLoss*gainRatio
-stopLossMargin = 0.05 # extra margin for the stop loss
+stopLossMargin = 0.03 # extra margin for the stop loss
+# TAKE PROFIT CURRENTLY 7% (1.5 GR, .05 stopLossMargin)
 
 operEquity = 10000 # defines the target amount per execution ($)
 limitOrderMargin = 0.1 # percentage that defines the offset for the limit orders
